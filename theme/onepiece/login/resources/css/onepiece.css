@@ -51,11 +51,100 @@ body {
 
 body {
   min-height: 100vh;
-  background:
+  background-image:
     linear-gradient(180deg, rgba(223, 227, 247, 0.4), rgba(223, 227, 247, 0.6)),
-    url("../img/sky.jpg") center / cover no-repeat fixed;
+    url("../img/sky.jpg");
+  background-repeat: no-repeat, no-repeat;
+  background-size: cover, 145% auto;
+  background-position: center, 0% center;
+  background-attachment: fixed, fixed;
+  animation: onepieceSail 30s ease-in-out infinite alternate;
   font-family: "Nunito", system-ui, sans-serif;
   color: var(--op-navy);
+}
+/* Deriva lenta dello sfondo (nuvole/mare) per dare l'idea della navigazione;
+   solo il layer della foto si muove, il gradiente resta fisso. */
+@keyframes onepieceSail {
+  from {
+    background-position: center, 0% center;
+  }
+  to {
+    background-position: center, 100% center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+}
+
+/* Due navi che solcano il mare in fondo alla pagina, da destra verso
+   sinistra: la Sunny in testa (a sinistra) inseguita dalla nave della
+   Marina (a destra) a distanza costante - stesso percorso e durata,
+   solo spostato di GAP px cosi' il divario resta identico in ogni istante.
+   Il buffer di uscita/entrata (oltre GAP) tiene entrambe le navi
+   completamente fuori schermo nel punto di reset del loop, cosi' non si
+   vede alcun salto. Pseudo-elementi su body: nessun markup nuovo, coerenti
+   con l'approccio "solo CSS/img" del tema. Dietro alla card (z-index:0) su
+   tutte le pagine di identita'. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  bottom: 7vh;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+body::before {
+  left: 0;
+  width: 132px;
+  height: 182px;
+  background-image: url("../img/sunny.png");
+  animation:
+    onepieceSunnySail 30s linear infinite,
+    onepieceShipBob 2.4s ease-in-out infinite alternate;
+}
+body::after {
+  left: 0;
+  width: 102px;
+  height: 130px;
+  background-image: url("../img/ship.png");
+  animation:
+    onepieceMarineSail 30s linear infinite,
+    onepieceShipBob 2.1s ease-in-out infinite alternate;
+}
+@keyframes onepieceSunnySail {
+  from {
+    left: calc(100vw + 500px);
+  }
+  to {
+    left: -500px;
+  }
+}
+@keyframes onepieceMarineSail {
+  from {
+    left: calc(100vw + 840px); /* 500px di buffer + 340px di GAP dietro la Sunny */
+  }
+  to {
+    left: -160px; /* -500px + 340px di GAP */
+  }
+}
+@keyframes onepieceShipBob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none;
+  }
 }
 
 a {
@@ -79,31 +168,41 @@ a:hover {
   padding: 36px 20px;
 }
 
-/* Il tema base usa questo blocco per il nome del realm: qui diventa il logo */
+/* Il tema base usa questo blocco per il nome del realm: qui diventa il logo,
+   ingrandito e spostato dentro il bordo superiore della card (margin-bottom
+   negativo + z-index sopra la card) cosi' resta interamente contenuto nella
+   card bianca invece che sopra lo sfondo. */
 .login-pf-page-header {
   width: 100%;
-  max-width: 420px;
+  max-width: 504px;
   text-align: center;
+  position: relative;
+  z-index: 2;
+  margin-bottom: -210px;
 }
 #kc-header-wrapper {
   display: inline-block;
-  width: 130px;
-  height: 62px;
+  width: 360px;
+  height: 172px;
   background: url("../img/logo.png") center / contain no-repeat;
   font-size: 0;
   line-height: 0;
   color: transparent;
 }
 
-/* Card bianca */
+/* Card bianca (+20% rispetto all'originale 420px -> 504px). Il padding-top
+   e' allargato per lasciare spazio al logo, ora interamente contenuto nella
+   card. */
 .card-pf {
   width: 100%;
-  max-width: 420px;
+  max-width: 504px;
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
   background: rgba(255, 255, 255, 0.97);
   border-radius: 28px;
   box-shadow: 0 26px 60px rgba(18, 50, 67, 0.24);
-  padding: 34px 32px 30px;
+  padding: 218px 38px 36px;
   text-align: center;
   animation: onepieceCardIn 0.2s ease-out;
 }
@@ -116,6 +215,25 @@ a:hover {
     opacity: 1;
     transform: none;
   }
+}
+
+/* Fat Luffy come mascotte di saluto, solo sulla pagina di conferma logout
+   (l'unica con il bottone #kc-logout - :has() individua la pagina senza
+   bisogno di un id/classe dedicati sul body, che il template non espone).
+   Pseudo-elemento sulla card, interamente contenuto al suo interno, sopra
+   al bottone di logout e allineato al suo bordo destro (nessun markup
+   nuovo). */
+.card-pf:has(#kc-logout)::after {
+  content: "";
+  position: absolute;
+  top: 212px;
+  right: 34px;
+  width: 108px;
+  height: 108px;
+  background: url("../img/fatluffy.png") center / contain no-repeat;
+  transform: rotate(-6deg);
+  z-index: 2;
+  animation: onepieceCardIn 0.25s ease-out 0.1s both;
 }
 
 .login-pf-header {
@@ -389,4 +507,69 @@ button[type="submit"],
 .kc-login-tooltip .kc-tooltip-text {
   font-size: 12px;
   color: var(--op-navy-soft);
+}
+
+/* Mobile: logo, navi e Fat Luffy sono dimensionati in px fissi per il
+   desktop e non si restringono da soli. Sotto ai 480px il logo (360px)
+   sfonda il contenitore (overflow orizzontale) e, su viewport bassi, viene
+   ritagliato in alto perche' il padding-top della card (218px, calcolato
+   per quella dimensione) non lascia abbastanza margine di respiro. Stessa
+   logica delle regole desktop, solo con misure ridotte. */
+@media (max-width: 480px) {
+  /* sky.jpg e' 1920x1080 (16:9): "145% auto" dimensiona per larghezza, che
+     su un viewport stretto e alto (mobile ritratto) produce un'immagine
+     troppo bassa per coprire tutta l'altezza - lo sfondo appare troncato
+     sopra/sotto la fascia della foto. Qui si dimensiona per altezza
+     (auto larghezza) cosi' la foto copre sempre verticalmente, con di
+     conseguenza ampio margine orizzontale per l'animazione di deriva. */
+  body {
+    background-size: cover, auto 145vh;
+  }
+
+  .login-pf-page-header {
+    margin-bottom: -133px;
+  }
+  #kc-header-wrapper {
+    width: 224px;
+    height: 107px;
+  }
+  .card-pf {
+    padding-top: 138px;
+  }
+
+  /* Navi piu' piccole e piu' vicine, cosi' la coppia si vede insieme anche
+     su schermi stretti (con il GAP da desktop sarebbero quasi sempre una
+     sola visibile alla volta). Stesso principio di buffer >= GAP + larghezza
+     nave per non mostrare il salto al riavvio del loop. */
+  body::before {
+    width: 84px;
+    height: 116px;
+  }
+  body::after {
+    width: 66px;
+    height: 84px;
+  }
+  @keyframes onepieceSunnySail {
+    from {
+      left: calc(100vw + 230px);
+    }
+    to {
+      left: -230px;
+    }
+  }
+  @keyframes onepieceMarineSail {
+    from {
+      left: calc(100vw + 360px); /* 230px di buffer + 130px di GAP */
+    }
+    to {
+      left: -100px; /* -230px + 130px di GAP */
+    }
+  }
+
+  .card-pf:has(#kc-logout)::after {
+    top: 164px;
+    right: 34px;
+    width: 72px;
+    height: 72px;
+  }
 }
