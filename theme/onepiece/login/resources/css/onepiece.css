@@ -1,0 +1,392 @@
+/*
+ * Tema "onepiece" - pagine di identita' (login, reset/aggiornamento
+ * password, aggiornamento profilo, verifica email, errore/info).
+ *
+ * Nessun template .ftl e' stato copiato: questo file si aggancia solo a
+ * classi/id gia' emessi dal tema "keycloak" (parent, vedi theme.properties) -
+ * .card-pf, .alert-error, #kc-page-title, .pf-c-form-control, ecc. - cosi'
+ * il tema resta compatibile con i futuri aggiornamenti minor di Keycloak 26.
+ *
+ * Fedele alla direzione "Sunny Deck" (docs/UI di riferimento nel repo
+ * dell'app, vedi anche onepiece-infrastructure/../docs/ui-ux-guidelines.md):
+ * card bianca arrotondata su sfondo illustrato, Baloo 2 per titoli/bottoni,
+ * Nunito per corpo/etichette, oro per l'azione primaria, banner di feedback
+ * colorati per tono con l'icona del Den Den Mushi al posto delle glyph
+ * FontAwesome del tema di base (rimosso, vedi stylesCommon in theme.properties).
+ */
+
+/* Import via @import: il layout di Keycloak (template.ftl) genera i <link>
+   di "styles"/"stylesCommon" solo relativi alle risorse del tema, non
+   accetta URL assolute - questo e' l'unico modo per caricare un web font
+   esterno senza toccare i template. */
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap");
+
+:root {
+  --op-navy: #123243;
+  --op-navy-soft: #4a6a7c;
+  --op-gold: #ffd23f;
+  --op-gold-hover: #ffdc6b;
+  --op-gold-shadow: #d9a715;
+  --op-border: #cdd6ef;
+  --op-placeholder: #a9bccb;
+  --op-ok-bg: #e6f7ec;
+  --op-ok-bd: #a9e2bd;
+  --op-ok-fg: #136c3a;
+  --op-err-bg: #fdeceb;
+  --op-err-bd: #f6bfb8;
+  --op-err-fg: #9c3325;
+  --op-warn-bg: #fff5e0;
+  --op-warn-bd: #ffdca3;
+  --op-warn-fg: #8a6212;
+  --op-info-bg: #e9edfb;
+  --op-info-bd: #c3cdf0;
+  --op-info-fg: #1a3d94;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(223, 227, 247, 0.4), rgba(223, 227, 247, 0.6)),
+    url("../img/sky.jpg") center / cover no-repeat fixed;
+  font-family: "Nunito", system-ui, sans-serif;
+  color: var(--op-navy);
+}
+
+a {
+  color: #1e4fc4;
+  font-weight: 700;
+  text-decoration: none;
+}
+a:hover {
+  color: #e2472e;
+}
+
+/* Pagina: colonna centrata (logo sopra, card sotto) */
+.login-pf-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 36px 20px;
+}
+
+/* Il tema base usa questo blocco per il nome del realm: qui diventa il logo */
+.login-pf-page-header {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+#kc-header-wrapper {
+  display: inline-block;
+  width: 130px;
+  height: 62px;
+  background: url("../img/logo.png") center / contain no-repeat;
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+}
+
+/* Card bianca */
+.card-pf {
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 28px;
+  box-shadow: 0 26px 60px rgba(18, 50, 67, 0.24);
+  padding: 34px 32px 30px;
+  text-align: center;
+  animation: onepieceCardIn 0.2s ease-out;
+}
+@keyframes onepieceCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.login-pf-header {
+  margin-bottom: 6px;
+}
+#kc-page-title {
+  font-family: "Baloo 2", cursive;
+  font-size: 25px;
+  font-weight: 700;
+  margin: 4px 0 6px;
+  color: var(--op-navy);
+}
+
+#kc-content,
+#kc-content-wrapper {
+  text-align: left;
+}
+
+.instruction {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--op-navy-soft);
+  margin: 0 0 18px;
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+label,
+.pf-c-form__label {
+  display: block;
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--op-navy);
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+select,
+textarea,
+.pf-c-form-control {
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px solid var(--op-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--op-navy);
+  background: #fff;
+}
+input::placeholder {
+  color: var(--op-placeholder);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #1e4fc4;
+}
+
+/* Campo password con pulsante mostra/nascondi */
+.pf-c-input-group {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.pf-c-input-group input {
+  padding-right: 46px;
+}
+.pf-c-input-group button[data-password-toggle] {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  width: 34px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--op-navy-soft);
+}
+.pf-c-input-group button[data-password-toggle] i {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: currentColor;
+  -webkit-mask: var(--onepiece-icon-eye) center / contain no-repeat;
+  mask: var(--onepiece-icon-eye) center / contain no-repeat;
+}
+.pf-c-input-group button[data-password-toggle][aria-label="Nascondi password"] i,
+.pf-c-input-group button[data-password-toggle][aria-label="Hide password"] i {
+  -webkit-mask-image: var(--onepiece-icon-eye-off);
+  mask-image: var(--onepiece-icon-eye-off);
+}
+:root {
+  --onepiece-icon-eye: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>');
+  --onepiece-icon-eye-off: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M3 3l18 18M10.6 10.6a3 3 0 004.2 4.2M9.9 4.2A11 11 0 0123 12s-1.5 2.6-4.2 4.6M6.1 6.1C3.4 7.9 1 12 1 12s2 3.5 5.2 5.6"/></svg>');
+}
+
+/* Checkbox (ricordami / disconnetti altre sessioni) */
+.checkbox,
+.pf-c-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--op-navy-soft);
+}
+input[type="checkbox"] {
+  accent-color: var(--op-gold);
+  width: 16px;
+  height: 16px;
+}
+
+#kc-form-options {
+  margin: 2px 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+
+/* Errori di campo */
+.pf-c-form__helper-text,
+#input-error,
+#input-error-username,
+#input-error-password,
+#input-error-password-confirm {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--op-err-fg);
+}
+
+/* Bottoni */
+input[type="submit"],
+button[type="submit"],
+.pf-c-button.pf-m-primary {
+  width: 100%;
+  cursor: pointer;
+  font-family: "Baloo 2", cursive;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--op-navy);
+  background: var(--op-gold);
+  border: none;
+  border-radius: 16px;
+  padding: 15px;
+  box-shadow: 0 6px 0 var(--op-gold-shadow);
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.pf-c-button.pf-m-primary:hover {
+  background: var(--op-gold-hover);
+}
+.pf-c-button.pf-m-primary:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 var(--op-gold-shadow);
+}
+
+.btn-default,
+.pf-c-button.pf-m-default {
+  width: 100%;
+  margin-top: 10px;
+  cursor: pointer;
+  font-family: "Baloo 2", cursive;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--op-navy);
+  background: #fff;
+  border: 2px solid var(--op-border);
+  border-radius: 16px;
+  padding: 13px;
+}
+.btn-default:hover,
+.pf-c-button.pf-m-default:hover {
+  background: #f4f6fd;
+}
+
+#kc-form-buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Banner di feedback (successo / attesa / errore / info) */
+.alert-success,
+.alert-warning,
+.alert-error,
+.alert-info {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  text-align: left;
+  border-radius: 16px;
+  border: 2px solid;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.alert-success {
+  background: var(--op-ok-bg);
+  border-color: var(--op-ok-bd);
+  color: var(--op-ok-fg);
+}
+.alert-warning {
+  background: var(--op-warn-bg);
+  border-color: var(--op-warn-bd);
+  color: var(--op-warn-fg);
+}
+.alert-error {
+  background: var(--op-err-bg);
+  border-color: var(--op-err-bd);
+  color: var(--op-err-fg);
+}
+.alert-info {
+  background: var(--op-info-bg);
+  border-color: var(--op-info-bd);
+  color: var(--op-info-fg);
+}
+
+.pf-c-alert__icon {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  background: url("../img/denden.png") center / contain no-repeat;
+}
+.onepiece-feedback-icon {
+  display: none;
+}
+
+.kc-feedback-text,
+.pf-c-alert__title {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Link informativi sotto la card (registrazione, verifica email, ecc.) */
+#kc-info,
+#kc-registration,
+#kc-registration-container {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #7c95a5;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Selettore lingua: nascosto, un'unica locale attiva */
+#kc-locale {
+  display: none;
+}
+
+/* Tooltip "riavvia login" sull'username mostrato in step successivi */
+.kc-login-tooltip .kc-tooltip-text {
+  font-size: 12px;
+  color: var(--op-navy-soft);
+}
