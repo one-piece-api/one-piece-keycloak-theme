@@ -91,13 +91,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Nessun package.json/versione applicativa in questo repo (solo file
-      # di tema): tag = latest + short SHA, invece di una versione semantica.
+      # Nessun package.json/versione applicativa in questo repo (solo file di
+      # tema): solo tag "latest", niente tag per-commit. Un tag univoco per
+      # ogni push (es. lo SHA) resterebbe taggato per sempre e "cleanup-untagged"
+      # sotto - che cancella solo i digest senza alcun tag - non lo
+      # rimuoverebbe mai, accumulando un'immagine per commit. Con un solo tag
+      # mobile, il digest precedente diventa untagged ad ogni push e viene
+      # eliminato da quel job, come per user-service/user-frontend (dove la
+      # stessa cosa succede quando la versione non cambia da un push all'altro).
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create \
-            -t ghcr.io/one-piece-api/keycloak-theme:${{ github.sha }} \
             -t ghcr.io/one-piece-api/keycloak-theme:latest \
             $(printf 'ghcr.io/one-piece-api/keycloak-theme@sha256:%s ' *)
 
