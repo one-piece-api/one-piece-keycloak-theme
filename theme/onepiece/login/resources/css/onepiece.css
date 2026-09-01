@@ -498,9 +498,84 @@ button[type="submit"],
   text-align: center;
 }
 
-/* Selettore lingua: nascosto, un'unica locale attiva */
+/* Selettore lingua: due locale supportate (it/en, vedi realm-onepiece.json),
+   quindi il template lo emette davvero - un piccolo controllo persistente in
+   alto a destra, coerente con lo switch IT/EN del frontend (stessa idea:
+   pillola compatta, non un elemento vistoso). Solo id stabili qui (nessuna
+   classe kcLocale*Class impostata in theme.properties, e senza PatternFly
+   caricato quelle classi non avrebbero comunque stile) - #kc-locale e' parte
+   del contratto id/classe del tema "keycloak" che questo file si aggancia
+   ovunque (vedi commento in testa al file). */
 #kc-locale {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 10;
+  font-family: "Nunito", system-ui, sans-serif;
+}
+#kc-locale-wrapper {
+  position: relative;
+}
+#kc-current-locale-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--op-navy);
+  font-family: "Nunito", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 7px 14px;
+  box-shadow: 0 4px 14px rgba(18, 50, 67, 0.18);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+#kc-current-locale-link:hover,
+#kc-current-locale-link:focus-visible {
+  border-color: var(--op-gold);
+  background: #fff;
+}
+#kc-current-locale-link::after {
+  content: "▾";
+  font-size: 10px;
+  color: var(--op-navy-soft);
+}
+#language-switch1 {
   display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  min-width: 120px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(18, 50, 67, 0.22);
+}
+/* Nessuna classe "aperto" nota lato JS del tema base da agganciare - lo
+   stato gia' esposto per accessibilita' (aria-expanded sul trigger) basta. */
+#kc-locale-dropdown:has(#kc-current-locale-link[aria-expanded="true"]) #language-switch1 {
+  display: block;
+}
+#language-switch1 a {
+  display: block;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--op-navy);
+  text-decoration: none;
+}
+#language-switch1 a:hover {
+  background: var(--op-gold);
 }
 
 /* Tooltip "riavvia login" sull'username mostrato in step successivi */
