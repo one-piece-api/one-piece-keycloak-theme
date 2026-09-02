@@ -383,9 +383,19 @@ input[type="checkbox"] {
   color: var(--op-err-fg);
 }
 
-/* Bottoni */
-input[type="submit"],
-button[type="submit"],
+/* Bottoni
+   ":not(.btn-default):not(.pf-m-default)" e' necessario perche' un bottone
+   "default"/secondario (es. "Annulla" su delete-account-confirm.ftl) e'
+   comunque type="submit" (deve POSTare il form) - senza l'esclusione,
+   l'attribute selector "button[type=submit]" (specificita' 0,1,1) batte
+   ".btn-default" da solo (0,1,0) e resta gold anche a riposo, poi perde
+   contro ".btn-default:hover" (0,2,0) solo in hover: un lampo oro→bianco
+   invece di una transizione coerente, e nessun'animazione di pressione (solo
+   ".pf-m-primary:active" esiste). Scoperto verificando dal vivo la pagina di
+   conferma cancellazione account, l'unica con due bottoni affiancati di tipi
+   diversi. */
+input[type="submit"]:not(.btn-default):not(.pf-m-default),
+button[type="submit"]:not(.btn-default):not(.pf-m-default),
 .pf-c-button.pf-m-primary {
   width: 100%;
   cursor: pointer;
@@ -424,10 +434,21 @@ button[type="submit"],
   border: 2px solid var(--op-border);
   border-radius: 16px;
   padding: 13px;
+  box-shadow: 0 4px 0 var(--op-border);
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.12s ease;
 }
 .btn-default:hover,
 .pf-c-button.pf-m-default:hover {
   background: #f4f6fd;
+}
+.btn-default:active,
+.pf-c-button.pf-m-default:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--op-border);
 }
 
 #kc-form-buttons {
@@ -477,6 +498,58 @@ button[type="submit"],
   background: url("../img/denden.png") center / contain no-repeat;
 }
 .onepiece-feedback-icon {
+  display: none;
+}
+
+/* Delete-account confirmation (delete-account-confirm.ftl, base theme): this
+   page's own warning icon is a PatternFly glyph font class this theme never
+   loads (no FontAwesome, see file header), so it renders blank by default -
+   drawn here in pure CSS instead, scoped to this one alert so it doesn't
+   affect any other ".pficon" usage elsewhere. */
+.kc-alert-delete-account .pficon-warning-triangle-o {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 22px;
+  height: 20px;
+}
+.kc-alert-delete-account .pficon-warning-triangle-o::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--op-warn-fg);
+  clip-path: polygon(50% 4%, 4% 96%, 96% 96%);
+}
+.kc-alert-delete-account .pficon-warning-triangle-o::after {
+  content: "!";
+  position: absolute;
+  inset: 0 0 2px 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: var(--op-warn-bg);
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* Re-authentication step-up (reached mid delete_account today - the only
+   flow in this realm that triggers it): "Password dimenticata?" navigates
+   to reset-credentials but Keycloak just re-renders this same password
+   screen instead of the actual reset form - its own behavior in this
+   context, not fixable via CSS/messages. Hiding a link that looks
+   functional but silently does nothing, rather than leaving it. Scoped via
+   ":has(#kc-attempted-username)" - that label only renders when Keycloak
+   already knows the username and is asking to re-prove it
+   (auth.showUsername() - see template.ftl), which is exactly this
+   re-authentication case and never the normal combined username+password
+   login form, so this can't accidentally hide a working "forgot password"
+   link elsewhere. ".login-pf-settings" (not "#kc-form-options" - verified
+   against the live-rendered DOM, which differs from the .ftl source read
+   directly: Keycloak resolves a different template variant here than
+   expected) is this link's actual wrapper on this specific page. */
+body:has(#kc-attempted-username) .login-pf-settings a {
   display: none;
 }
 
